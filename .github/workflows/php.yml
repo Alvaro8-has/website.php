@@ -1,39 +1,32 @@
-name: PHP Composer
+name: CI
 
-on:
-  push:
-    branches: [ "Dzaky" ]
-  pull_request:
-    branches: [ "Dzaky" ]
-
-permissions:
-  contents: read
+on: [push]
 
 jobs:
   build:
-
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    # - name: Run test suite
-    #   run: composer run-script test
+      - uses: actions/checkout@v1
+      - name: Install Nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install nodejs dependencies
+        run: |
+          yarn
+      - name: Run Webpack Build
+        run: |
+          yarn production
+      - name: Commit
+        run: |
+          git config --local user.name "Alvaro8-has"
+          git config --local user.email "alvarodewa07@gmail.com"
+          git add .
+          git commit -m "[AUTO:BUILD] build from main.js"
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          branch: "master"
+          repository: "Alvaro8-has/github.website.php"
